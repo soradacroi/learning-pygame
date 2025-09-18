@@ -25,11 +25,21 @@ def create_planet(x, y, mass, color, radius, vel_x=0, vel_y=0):
         "radius": radius,
         "vel_x": vel_x,
         "vel_y": vel_y,
+        "trail": []  # Add an empty list to store trail points
     }
 
 def draw_planet(screen, planet):
-    """Draws a planet on the screen."""
+    """Draws a planet and its trail on the screen."""
+    # Draw the main planet
     pygame.draw.circle(screen, planet["color"], (int(planet["x"]), int(planet["y"])), planet["radius"])
+    
+    # Draw the trail points
+    # We iterate through the trail in reverse to draw the most recent points first
+    for i, pos in enumerate(planet["trail"]):
+        # The trail circles get smaller and more transparent as they get older
+        alpha = 255 - (i * (255 // len(planet["trail"]))) if len(planet["trail"]) > 0 else 0
+        trail_color = planet["color"] + (alpha,)
+        pygame.draw.circle(screen, trail_color, pos, 1)
 
 def update_positions(planets):
     """Updates the position of each planet based on gravitational forces."""
@@ -59,6 +69,13 @@ def update_positions(planets):
             forces[i]["y"] += force_y
 
     for i, planet in enumerate(planets):
+        # Update the planet's trail history
+        planet["trail"].append((int(planet["x"]), int(planet["y"])))
+        # Keep the trail length limited to avoid performance issues
+        if len(planet["trail"]) > 100:
+            planet["trail"].pop(0)
+
+        # Update position
         acceleration_x = forces[i]["x"] / planet["mass"]
         acceleration_y = forces[i]["y"] / planet["mass"]
 
@@ -69,9 +86,12 @@ def update_positions(planets):
         planet["y"] += planet["vel_y"]
 
 
+
+
 # --- main simulation loop ---
 def main():
     pygame.init()
+    # Create a screen that supports alpha for transparency
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
 
@@ -79,14 +99,17 @@ def main():
     sun = create_planet(WIDTH // 2, HEIGHT // 2, 100000, YELLOW, 30, vel_x=0, vel_y=-0.1)
     earth = create_planet(WIDTH // 2 - 200, HEIGHT // 2, 500, BLUE, 15, vel_y=18.1)
     moon = create_planet(WIDTH // 2 - 150, HEIGHT // 2, 0.1, WHITE, 8, vel_y=22.82)
-    
-    planets = [sun, earth, moon]
+    astroid = create_planet(WIDTH // 2 - 100, HEIGHT // 2, 0.001, WHITE, 3, vel_y=24.82)
+
+    planets = [sun, earth, moon, astroid]
     
     running = True
     while running:
         clock.tick(60)
+        
         screen.fill((0, 0, 0))
-
+        
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
