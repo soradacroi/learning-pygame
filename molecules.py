@@ -86,7 +86,7 @@ def main():
     m = {"0" : create_particle_dic(L, 200, 0, 0)}   
     for i in range(1,n):
         #m[str(i)] = create_particle_dic(Q, random.choices(population, weights, k=1)[0], 0, 0)
-        m[str(i)] = create_particle_dic(Q, 20, random.randint(0, 2), random.randint(0, 2), random.randint(100, 600), random.randint(100, 600))
+        m[str(i)] = create_particle_dic(Q, 20, random.randint(-1, 1), random.randint(-1, 1), random.randint(100, 980), random.randint(100, 600))
         
         #print(m[str(i)])
     #print(m)
